@@ -18,7 +18,7 @@ This project demonstrates a **complete data engineering ETL pipeline** that extr
 
 ---
 ## 📷 Architecture
-![Architecture Diagram]()
+![Architecture Diagram](https://github.com/Niladri005/spotify-end-to-end-data-engineering-project/blob/main/spotify_data_pipeline.png)
 
 ---
 ## 🧠 Key Features
