@@ -55,17 +55,19 @@ This project demonstrates a **complete data engineering ETL pipeline** that extr
 
 Install the required libraries locally:
 
-bash
+```
 pip install pandas
 pip install numpy
 pip install spotipy
+```
 ---
+```
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import boto3
 import pandas as pd
 import numpy as np
-
+```
 ---
 ## 🔧 Setup & Deployment
 
