@@ -136,12 +136,78 @@ SELECT * FROM artists LIMIT 10;
 
 
 
+# Load Phase Implementation using SnowFlake
+
+## 📷 Architecture
+![Architecture Diagram](https://github.com/Niladri005/spotify-end-to-end-data-engineering-project/blob/main/Spotify-ETL-Diagram-Snowflake.jpg)
+
+### 1. Table Creation in Snowflake  
+
+Created structured tables for storing Spotify data:  
+
+- `album_data`  
+- `artist_data`  
+- `songs_data`  
+
+ ### 2. S3 Integration with Snowflake
+
+>>Configured Storage Integration using AWS IAM role for secure connectivity.
+
+>>Created a Stage in Snowflake pointing to the S3 bucket.
+
+>>Defined a CSV File Format to handle schema consistency.
+
+### 3. Data Ingestion (COPY INTO + Snowpipes)
+
+>>Verified ingestion using COPY INTO commands.
+
+>>Built three Snowpipes for auto-ingestion of data:
+
+  ALBUM_DATA_PIPE
+
+  ARTIST_DATA_PIPE
+
+  SONGS_DATA_PIPE
+
+### 4. AWS S3 Event Notifications
+
+>>Configured event triggers in S3 to enable near real-time ingestion into Snowflake:
+
+>>album_data_event
+
+>>artist_data_event
+
+>>songs_data_event
 
 
-## 🙋‍♂️ Author
+## 🚀 Features
+
+-  **Automated Ingestion**: Seamless data flow from **Amazon S3 → Snowflake**  
+-  **Scalable & Secure Pipeline**: Built with **IAM roles** and **Storage Integration**  
+-  **Near Real-Time Loading**: Powered by **Snowpipes** and **S3 Event Notifications**  
+-  **Analytics-Ready Data**: Organized into a **clean, structured schema** for downstream use
+
+
+##  Tech Stack after implementing snowflake
+
+- **Cloud Storage**: AWS S3  
+- **Data Warehouse**: Snowflake  
+- **Automation**: Snowpipes, Event Notifications  
+- **Language / SQL**: Snowflake SQL ,python
+
+### Project Flow  
+Spotify API → S3 (Raw Data) → Transformations → S3 (Transformed Data)
+→ Snowflake Stage → COPY INTO / Snowpipes → Snowflake Tables
+
+
+
+
+
+
+## Author
 
 **Niladri Goswami**  
-🧑‍💻 Software Engineer | Data Enthusiast  
+Software Engineer | Data Enthusiast  
 
 - 🔗 [LinkedIn](https://www.linkedin.com/in/)
 - 🔗 [GitHub](https://github.com/)
