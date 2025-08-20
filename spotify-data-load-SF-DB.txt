@@ -1,0 +1,124 @@
+//creating tables to load the spotyfy data which is already transformed and in S3 folder.
+ 
+ CREATE TABLE album_data (
+ album_id varchar,
+ release_date varchar,
+ track_name varchar,
+ artist_name varchar,
+ total_tracks integer,
+ album_type varchar
+ );
+ 
+ 
+ -- Create artist_data table
+ CREATE TABLE artist_data (
+ artist_id varchar,
+ artist_name varchar,
+ external_url varchar
+ );
+ 
+ -- Create songs_data table
+ CREATE TABLE songs_data (
+ song_id varchar,
+ song_name varchar,
+ duration_ms integer,
+ url varchar,
+ popularity integer,
+ song_added varchar,
+ album_id varchar,
+ artist_id varchar
+ );
+ 
+ 
+ 
+ //creating stage to establist connection with S3
+ 
+ //had to create an IAM role to s3--->put STORAGE_AWS_EXTERNAL_ID to event notification json in aws and put AWS arn_role to snowflake stage.
+ 
+ create OR REPLACE storage integration s3_spotify_init
+ type = external_stage
+ storage_provider = s3
+ storage_aws_role_arn = 'arn:aws:iam::0000000000:role/spotify-SF-S3-connector'
+ enabled = true
+ storage_allowed_locations = ( 's3://spotify-etl-project-niladri05/transformed_data/')
+ -- storage_blocked_locations = ( 's3://<location1>', 's3://<location2>' )
+ -- comment = '<comment>'
+ ;
+ 
+ desc integration s3_spotify_init;
+ 
+ 
+ 
+ 
+ //creating a file Snowflake format
+ CREATE OR REPLACE FILE FORMAT Spotify_CSV_FORMAT
+ TYPE = 'CSV'
+ FIELD_DELIMITER = ','
+ SKIP_HEADER = 1
+ FIELD_OPTIONALLY_ENCLOSED_BY = '"';
+ 
+ 
+ 
+ //creating stage from Spotify FOlder in S3
+ CREATE OR REPLACE STAGE S3_SPOTIFY_STAGE
+ URL= "s3://spotify-etl-project-niladri05/transformed_data/"
+ STORAGE_INTEGRATION= s3_spotify_init
+ FILE_FORMAT= "spotify-etl-project".SPORTIFY.Spotify_CSV_FORMAT;
+ 
+ desc stage S3_SPOTIFY_STAGE;
+ 
+ 
+ //Test copy command just check my connections are working
+ COPY INTO "spotify-etl-project".SPORTIFY.ALBUM_DATA
+ FROM @S3_SPOTIFY_STAGE/album_data/
+ --FILES = ('album_transformed_2025-07-10 19:45:22.336729.csv');
+ PATTERN = '.*album_transformed.*'; 
+ 
+ 
+ select * from ALBUM_DATA limit 5; 
+ truncate ARTIST_DATA;
+ 
+ // Now I will create three diffrent snowpipes for three different folders.
+ 
+ --ALBUM_DATA_PIPE
+ CREATE OR REPLACE PIPE "spotify-etl-project".SPORTIFY.ALBUM_DATA_PIPE
+ AUTO_INGEST = TRUE
+ AS
+ COPY INTO "spotify-etl-project".SPORTIFY.ALBUM_DATA
+ FROM @S3_SPOTIFY_STAGE/album_data/
+ --FILES = ('album_transformed_2025-07-10 19:45:22.336729.csv');
+ PATTERN = '.*album_transformed.*'; 
+ 
+ 
+ --
+ CREATE OR REPLACE PIPE "spotify-etl-project".SPORTIFY.ARTIST_DATA_PIPE
+ AUTO_INGEST = TRUE
+ AS
+ COPY INTO "spotify-etl-project".SPORTIFY.ARTIST_DATA
+ FROM @S3_SPOTIFY_STAGE/artist_data/
+ --FILES = ('album_transformed_2025-07-10 19:45:22.336729.csv');
+ PATTERN = '.*artist_transformed.*'; 
+ 
+ 
+ --
+ CREATE OR REPLACE PIPE "spotify-etl-project".SPORTIFY.SONGS_DATA_PIPE
+ AUTO_INGEST = TRUE
+ AS
+ COPY INTO "spotify-etl-project".SPORTIFY.SONGS_DATA
+ FROM @S3_SPOTIFY_STAGE/songs_data/
+ --FILES = ('album_transformed_2025-07-10 19:45:22.336729.csv');
+ PATTERN = '.*songs_transformed.*'; 
+ 
+ truncate SONGS_DATA;
+ 
+ DESC PIPE "spotify-etl-project".SPORTIFY.SONGS_DATA_PIPE;
+ 
+ //Created below Events in AWS.
+ album_data_event
+ artist_data_event
+ songs_data_event
+ 
+ 
+ select * from ALBUM_DATA limit 5; 
+ select * from SONGS_DATA limit 5; 
+ select * from ARTIST_DATA limit 5;
